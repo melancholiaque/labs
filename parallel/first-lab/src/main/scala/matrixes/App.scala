@@ -18,10 +18,6 @@ class Daemon extends Actor {
 
   IO(Tcp) ! Bind(self, new InetSocketAddress("localhost", 8000))
 
-  /*def receive = {
-    case _ => sender() ! "cli interface"
-  }*/
-
   def receive = {
     case b @ Bound(localAddress) =>
       context.parent ! b
