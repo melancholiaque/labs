@@ -4,7 +4,7 @@
 Repo contains code of `parallel vs sequental` implementation of certain word count in text corpus.<br>
 file `naive.py` contains sequental implementation.<br>
 files `server.py` and `client.py` containts parallel implementation, besides `settings.py` aids 
-one to conviniently configurate connection or text corpus destination.
+one to conviniently configurate connection, text corpus destination or word counted.
 <br>
 
 ### Test<br>
