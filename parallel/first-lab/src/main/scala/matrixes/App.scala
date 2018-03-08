@@ -19,9 +19,7 @@ class Daemon extends Actor {
   IO(Tcp) ! Bind(self, new InetSocketAddress("localhost", 8000))
 
   def receive = {
-    case b @ Bound(localAddress) =>
-      context.parent ! b
-      
+
     case CommandFailed(_: Bind) => context stop self
       
     case c @ Connected(remote, local) =>
@@ -43,7 +41,12 @@ class Server extends Actor {
 class SimplisticHandler extends Actor {
   import Tcp._
   def receive = {
-    case Received(data) => sender() ! Write(data)
+    case Received(data) =>
+      val str = data.utf8String.trim
+      str match {
+        case "hello" => sender() ! Write(ByteString("haii\n"))
+        case _       => sender() ! Write(ByteString("unknown command\n"))
+      }
     case PeerClosed     => context stop self
   }
 }
@@ -69,7 +72,7 @@ object App {
 
     val system = ActorSystem("daemon-system")
 
-    //val daemon = system.actorOf(Props[Daemon], "daemon")
+    val daemon = system.actorOf(Props[Daemon], "daemon")
 
     println( "WATASHI WA NEKO NANODESU SAMPAIIIIIIII" )
   }
