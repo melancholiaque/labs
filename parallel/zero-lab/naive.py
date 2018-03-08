@@ -1,5 +1,6 @@
 from collections import defaultdict
 from os import listdir, path
+import aiofiles
 
 result = defaultdict(int)
 DATADIR = 'data'
