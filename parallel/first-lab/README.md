@@ -1,5 +1,5 @@
-TODO
+# TODO
 
-[ ] add loging
-[ ] refactoring
-[ ] persistent progress storage
+- [ ] add loging<br>
+- [ ] refactoring<br>
+- [ ] persistent progress storage<br>
