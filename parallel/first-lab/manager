@@ -1,0 +1,38 @@
+#!bin/python3
+#line above imply that you need to run all code below virtualenv
+
+from subprocess import Popen, DEVNULL
+import click
+from utility import send, send_return, gen_sample
+from settings import COLS
+
+@click.group()
+def cli():
+    pass
+
+@cli.command('runserver')
+@click.option('--daemon', is_flag=True)
+def runserver(daemon):
+    if daemon:
+        Popen(["python", "server.py"], stdout=DEVNULL)
+    else:
+        import server
+        server.server_run()
+
+@cli.command('stopserver')
+def stopserver():
+    send('terminate')
+    print(f'server terminated')
+
+@cli.command('generate-sample')
+def generate_sample():
+    gen_sample()
+
+@cli.command('progress')
+def progress():
+    result = loads(send_return('progress'))
+    processed = len(result)
+    print(f'processed {processed}/{COLS}')
+
+if __name__ == '__main__':
+    cli()
