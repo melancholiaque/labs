@@ -3,6 +3,7 @@
 
 from subprocess import Popen, DEVNULL
 import click
+from json import loads
 from utility import send, send_return, gen_sample
 from settings import COLS
 
@@ -21,8 +22,11 @@ def runserver(daemon):
 
 @cli.command('stopserver')
 def stopserver():
-    send('terminate')
-    print(f'server terminated')
+    try:
+        send('terminate')
+        print(f'server terminated')
+    except:
+        print('no connection to server')
 
 @cli.command('generate-sample')
 def generate_sample():
@@ -30,9 +34,12 @@ def generate_sample():
 
 @cli.command('progress')
 def progress():
-    result = loads(send_return('progress'))
-    processed = len(result)
-    print(f'processed {processed}/{COLS}')
+    try:
+        result = loads(send_return('progress'))
+        print(f"current workers {result['workers']}")
+        print(f"processed {len(result['processed'])}/{COLS}")
+    except:
+        print('no connection to server')
 
 if __name__ == '__main__':
     cli()

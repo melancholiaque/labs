@@ -18,7 +18,7 @@ async def mapper(loop):
             for n, l in tqdm(enumerate(fp), total=ROWS):
                 row = fromstring(l, sep=',')
                 result.append(dot(row , col))
-        with open(f'cols/{col_num}','w') as fp:
+        with open(f'cols/{col_num}.dat','w') as fp:
             fp.write(f"{','.join(map(str, result))}\n")
         writer.write(b'processed\n')
         await writer.drain()
@@ -27,7 +27,9 @@ async def mapper(loop):
 loop = get_event_loop()
 try:
     loop.run_until_complete(mapper(loop))
-except:
+except KeyboardInterrupt:
     print('\ncomputation terminated')
+except:
+    print('error occured during connection or computation')
 finally:
     loop.close()
