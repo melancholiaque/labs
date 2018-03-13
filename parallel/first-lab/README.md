@@ -12,4 +12,4 @@ Repo conatins code that implements client-server multiplication of big matrixes 
 <br>
 
 ### Demo
-[![alt](https://asciinema.org/a/169408.png)](https://asciinema.org/a/169408)
+[![alt](https://github.com/melancholiaque/labs/blob/master/parallel/first-lab/preview.png)](https://asciinema.org/a/169408)
