@@ -1,11 +1,17 @@
-from settings import *
-import logging
+from settings import COLS, PROGRESS, ADDR, PORT
+from asyncio import get_event_loop, start_server
+from json import dumps, loads
+from collections import deque
+from functools import partial
+from pickle import dump, load
+from logging import basicConfig, info, INFO
 
-logging.basicConfig(filename='server.log', level=logging.INFO)
+basicConfig(filename='server.log', level=INFO)
 loop = get_event_loop()
 processed = deque(maxlen=COLS)
 workers = 0
-with open('progress.dat', 'rb') as fp:
+
+with open(PROGRESS, 'rb') as fp:
     slices = load(fp)
 
 for i in range(COLS):
@@ -15,29 +21,32 @@ for i in range(COLS):
 async def serve(reader,writer):
     global workers
     workers += 1
-    logging.info(f'new worker connected')
+    info(f'new worker connected')
     while slices:
-        col_slice = slices.popleft()
-        logging.info(f'delegating col {col_slice}')
+        column = slices.popleft()
+        info(f'delegating column {column}')
         try:
-            writer.write(dumps(col_slice).encode()+b'\n')
+            writer.write(dumps(column).encode()+b'\n')
             await writer.drain()
             _ = await reader.readuntil()
             res = await reader.readuntil()
-            logging.info(f'col {col_slice} processed')
+            info(f'column {column} processed')
         except:
-            logging.info(f'worker disconnected')
-            slices.appendleft(col_slice)
-            logging.info(f'col {col_slice} returned to pull')
+            info(f'worker disconnected')
+            slices.appendleft(column)
+            info(f'column {column} returned to pull')
             workers -= 1
             return
-        processed.append(col_slice)
+        processed.append(column)
     if len(processed) == processed.maxlen:
-        logging.info('computational task completed')
+        info('computational task completed')
         loop.stop()
 
 async def terminate():
     loop.stop()
+
+async def unknown_msg(msg):
+    info(f'got unexpected message {msg}')
 
 async def progress(reader,writer):
     writer.write(dumps({
@@ -56,23 +65,23 @@ async def handle_new_conn(reader, writer):
         'client'    : partial(serve, reader, writer),
         'terminate' : terminate,
         'progress'  : partial(progress, reader, writer)
-    }[msg]
+    }.get(msg, partial(unknown_msg, msg))
     await action()
 
 def server_run():
     coro = start_server(handle_new_conn, ADDR, PORT, loop=loop)
     server = loop.run_until_complete(coro)
     try:
-        logging.info('server started')
+        info('server started')
         loop.run_forever()
     except KeyboardInterrupt:
-        logging.info('server terminated by user')
+        info('server terminated by user')
     except:
-        logging.info('server terminated unexpectedly')
+        info('server terminated unexpectedly')
     finally:
-        with open('progress.dat', 'wb') as fp:
+        with open(PROGRESS, 'wb') as fp:
             dump(slices, fp)
-        logging.info('progress saved')
+        info('progress saved')
         server.close()
 
 if __name__ == '__main__':

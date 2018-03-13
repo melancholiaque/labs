@@ -1,6 +1,8 @@
-import numpy as np
-from settings import *
+from settings import FNAME1, FNAME2, ADDR, PORT, ROWS, COLS
 import socket
+
+import numpy as np
+from tqdm import tqdm
 
 def gen_sample():
     for FILE in (FNAME1, FNAME2):
@@ -12,7 +14,7 @@ def gen_sample():
 
 def send(msg):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((ADDR,PORT))
+    s.connect((ADDR, PORT))
     s.send(msg.encode() + b'\n')
     s.close()
 

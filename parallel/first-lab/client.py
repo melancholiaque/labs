@@ -1,4 +1,10 @@
-from settings import *
+from settings import ADDR, PORT, FNAME1, FNAME2, ROWS
+from asyncio import open_connection, get_event_loop
+from json import loads, dumps
+from time import time
+
+from numpy import genfromtxt, dot, fromstring, int32
+from tqdm import tqdm
 
 async def mapper(loop):
     reader, writer = await open_connection(ADDR, PORT, loop=loop)
@@ -29,7 +35,8 @@ try:
     loop.run_until_complete(mapper(loop))
 except KeyboardInterrupt:
     print('\ncomputation terminated')
-except:
+except Exception as e:
     print('error occured during connection or computation')
+    print(e)
 finally:
     loop.close()

@@ -1,19 +1,11 @@
-from asyncio import open_connection, get_event_loop, Queue, start_server
-from json import dumps, loads
-from collections import defaultdict, deque
-from os import listdir, path
-from numpy import genfromtxt, dot, fromstring, int32
-from tqdm import tqdm
-from time import time
-from functools import partial
-from pickle import dump, load
+from os import path
+from collections import deque
+from pickle import dump
 
 ADDR, PORT = '127.0.0.1', 8764
-FNAME1, FNAME2 = 'matrixes/file1.dat', 'matrixes/file2.dat'
+FNAME1, FNAME2 = 'matrixes/A.dat', 'matrixes/B.dat'
 PROGRESS = 'progress.dat'
-ROWS, COLS = 1000, 1000
-COLS_SLICES = 5
-ROW_SLICES = COLS_SLICES
+ROWS, COLS = 1_000, 1_000
 
 if not path.exists(PROGRESS):
     with open(PROGRESS,'wb') as fp:
