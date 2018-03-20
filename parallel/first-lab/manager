@@ -2,25 +2,26 @@
 #line above imply that you need to run all code below virtualenv
 
 from subprocess import Popen, DEVNULL
-import click
 from json import loads
 from utility import send, send_return, gen_sample
 from settings import COLS
+
+import click
 
 @click.group()
 def cli():
     pass
 
-@cli.command('runserver')
-@click.option('--daemon', is_flag=True)
-def runserver(daemon):
-    if daemon:
+@cli.command('run')
+@click.option('--bg', is_flag=True)
+def runserver(bg):
+    if bg:
         Popen(["python", "server.py"], stdout=DEVNULL)
     else:
         import server
         server.server_run()
 
-@cli.command('stopserver')
+@cli.command('stop')
 def stopserver():
     try:
         send('terminate')
@@ -28,7 +29,7 @@ def stopserver():
     except:
         print('no connection to server')
 
-@cli.command('generate-sample')
+@cli.command('gen-sample')
 def generate_sample():
     gen_sample()
 
