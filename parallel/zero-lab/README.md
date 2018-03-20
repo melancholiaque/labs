@@ -10,4 +10,4 @@ one to conviniently configurate connection, text corpus destination or word coun
 ### Demo<br>
 Demo has been run on 10x copies of "War and Peace" by Leo Tolstoy.<br>
 <br>
-<img src="https://github.com/melancholiaque/labs/blob/master/parallel/zero-lab/demo.gif" width="512" height="536">
+<img src="https://github.com/melancholiaque/labs/blob/master/parallel/zero-lab/demo.gif" width="600" height="600">
