@@ -1,6 +1,6 @@
 from settings import COLS, PROGRESS, ADDR, PORT
 from asyncio import get_event_loop, start_server
-from json import dumps, loads
+from json import dumps
 from collections import deque
 from functools import partial
 from pickle import dump, load
@@ -15,10 +15,11 @@ with open(PROGRESS, 'rb') as fp:
     slices = load(fp)
 
 for i in range(COLS):
-    if not i in slices:
+    if i not in slices:
         processed.append(i)
 
-async def serve(reader,writer):
+
+async def serve(reader, writer):
     global workers
     workers += 1
     info(f'new worker connected')
@@ -31,7 +32,7 @@ async def serve(reader,writer):
             _ = await reader.readuntil()
             res = await reader.readuntil()
             info(f'column {column} processed')
-        except:
+        except Exception:
             info(f'worker disconnected')
             slices.appendleft(column)
             info(f'column {column} returned to pull')
@@ -42,13 +43,16 @@ async def serve(reader,writer):
         info('computational task completed')
         loop.stop()
 
+
 async def terminate():
     loop.stop()
+
 
 async def unknown_msg(msg):
     info(f'got unexpected message {msg}')
 
-async def progress(reader,writer):
+
+async def progress(reader, writer):
     writer.write(dumps({
             'workers': workers,
             'processed': list(processed)
@@ -68,6 +72,7 @@ async def handle_new_conn(reader, writer):
     }.get(msg, partial(unknown_msg, msg))
     await action()
 
+
 def server_run():
     coro = start_server(handle_new_conn, ADDR, PORT, loop=loop)
     server = loop.run_until_complete(coro)
@@ -76,13 +81,14 @@ def server_run():
         loop.run_forever()
     except KeyboardInterrupt:
         info('server terminated by user')
-    except:
+    except Exception:
         info('server terminated unexpectedly')
     finally:
         with open(PROGRESS, 'wb') as fp:
             dump(slices, fp)
         info('progress saved')
         server.close()
+
 
 if __name__ == '__main__':
     server_run()

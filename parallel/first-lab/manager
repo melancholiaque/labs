@@ -1,5 +1,5 @@
 #!bin/python3
-#line above imply that you need to run all code below virtualenv
+# line above imply that you need to run all code below virtualenv
 
 from subprocess import Popen, DEVNULL
 from json import loads
@@ -8,30 +8,38 @@ from settings import COLS
 
 import click
 
+
 @click.group()
 def cli():
     pass
 
+
 @cli.command('run')
 @click.option('--bg', is_flag=True)
-def runserver(bg):
+@click.option('--workers', default=0, help='initial number of workers')
+def runserver(bg, workers):
     if bg:
         Popen(["python", "server.py"], stdout=DEVNULL)
+        for worker in range(workers):
+            Popen(["python", "client.py", "-q"])
     else:
         import server
         server.server_run()
+
 
 @cli.command('stop')
 def stopserver():
     try:
         send('terminate')
         print(f'server terminated')
-    except:
+    except Exception:
         print('no connection to server')
+
 
 @cli.command('gen-sample')
 def generate_sample():
     gen_sample()
+
 
 @cli.command('progress')
 def progress():
@@ -39,8 +47,9 @@ def progress():
         result = loads(send_return('progress'))
         print(f"current workers {result['workers']}")
         print(f"processed {len(result['processed'])}/{COLS}")
-    except:
+    except Exception:
         print('no connection to server')
+
 
 if __name__ == '__main__':
     cli()
