@@ -1,0 +1,36 @@
+#!bin/python3
+# line above imply that you need to run all code below virtualenv
+
+from subprocess import Popen, DEVNULL
+import click
+
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command('run', help='run server')
+@click.option('--workers', default=0)
+@click.option('--quiet', default=False)
+def runserver(workers, quiet):
+    awaited = []
+    for w in range(workers):
+        if quiet:
+            awaited.append(
+                Popen(["bin/python3", "worker.py", f"{w+1}"],
+                      stdout=DEVNULL)
+            )
+        else:
+            awaited.append(
+                Popen(["bin/python3", "worker.py", f"{w+1}"])
+            )
+    try:
+        for p in awaited:
+            p.wait()
+    except Exception:
+        pass
+
+
+if __name__ == '__main__':
+    cli()
