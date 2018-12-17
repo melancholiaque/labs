@@ -1,10 +1,6 @@
 import numpy as np
 
 
-X = np.array(([0, 0], [0, 1], [1, 0], [1, 1]), dtype=float)
-y = np.array(([0], [0], [0], [1]), dtype=int)
-
-
 class MLP:
 
     def __new__(cls, *args, **kwargs):
@@ -25,50 +21,29 @@ class MLP:
         return inst
 
     def __init__(self, X, y):
-        for _ in range(self.epoch):
-            self.train(X, y)
-            if self.loss_(X, y) < self.loss:
-                break
+        self.fit(X, y)
 
-    def forward(self, X):
+    def fit(self, X, y):
+        for _ in range(self.epoch):
+            self.backward(X, y, self.predict(X))
+            if np.mean(np.square(y - self.predict(X))) < self.loss:
+                break
+        return self
+
+    def predict(self, X):
         vec, ln = X, len(self.zs)
         for i, w in enumerate(reversed(self.ws)):
-            self.zs[ln - i - 1] = vec = self.f(np.dot(vec, w))
+            self.zs[ln - i - 1] = vec = self.f(vec @ w)
         return vec
 
     def backward(self, X, y, o):
         error = y - o
         delta = error * self.df(o)
-        self.ws[0] += self.rate * self.zs[1].T.dot(delta)
+        self.ws[0] += self.rate * self.zs[1].T @ delta
         for i, w in enumerate(self.ws[1:-1]):
-            error = delta.dot(self.ws[i].T)
+            error = delta @ self.ws[i].T
             delta = error * self.df(self.zs[i+1])
-            self.ws[i+1] += self.rate * self.zs[i+2].T.dot(delta)
-        error = delta.dot(self.ws[-2].T)
+            self.ws[i+1] += self.rate * self.zs[i+2].T @ delta
+        error = delta @ self.ws[-2].T
         delta = error * self.df(self.zs[-1])
-        self.ws[-1] += self.rate * X.T.dot(delta)
-
-    def train(self, X, y):
-        o = self.forward(X)
-        self.backward(X, y, o)
-
-    def loss_(self, X, y):
-        return np.mean(np.square(y - self.forward(X)))
-
-
-class mlp(MLP):
-
-    rate = 0.1
-    epoch = 100_000
-    loss = 0.001
-
-    f = lambda x: 1 / (1 + np.exp(-x))
-    df = lambda x: x * (1 - x)
-
-    input = 2
-    hidden = [3]
-    output = 1
-
-
-my_little_pony = mlp(X, y)
-print(my_little_pony.forward(X))
+        self.ws[-1] += self.rate * X.T @ delta
